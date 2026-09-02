@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Users, UserPlus, Mail, Phone, ShieldCheck, Trash2, Key, RefreshCw } from 'lucide-react';
+import { Users, UserPlus, Mail, Phone, ShieldCheck, Trash2, Key } from 'lucide-react';
 
-export default function StaffManagement({ staff, onAddStaff, onDeleteStaff, onClearDemoData, currentUser }) {
+export default function StaffManagement({ staff, onAddStaff, onDeleteStaff, currentUser }) {
   const [newStaff, setNewStaff] = useState({
     name: '',
     email: '',
@@ -53,21 +53,6 @@ export default function StaffManagement({ staff, onAddStaff, onDeleteStaff, onCl
             <UserPlus className="w-4 h-4" />
             <span>{isAdding ? 'Close Form' : 'Add Staff Member'}</span>
           </button>
-
-          {currentUser?.isAdmin && (
-            <button
-              onClick={() => {
-                if (confirm('Are you sure you want to clear all demo leads and start fresh for REAL production data entry?')) {
-                  onClearDemoData();
-                }
-              }}
-              className="flex items-center space-x-1.5 px-3.5 py-1.5 bg-destructive/15 text-destructive hover:bg-destructive/25 text-xs font-bold rounded-md border border-destructive/30 transition-all cursor-pointer"
-              title="Clear all demo leads to enter real enterprise data"
-            >
-              <RefreshCw className="w-4 h-4" />
-              <span>Clear Demo Data (Start Fresh)</span>
-            </button>
-          )}
         </div>
       </div>
 
