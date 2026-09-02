@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Users, UserPlus, Mail, Phone, ShieldCheck, Trash2, Key } from 'lucide-react';
+import ConfirmModal from './ConfirmModal';
 
 export default function StaffManagement({ staff, onAddStaff, onDeleteStaff, currentUser }) {
   const [newStaff, setNewStaff] = useState({
@@ -11,6 +12,7 @@ export default function StaffManagement({ staff, onAddStaff, onDeleteStaff, curr
   });
 
   const [isAdding, setIsAdding] = useState(false);
+  const [deletingMember, setDeletingMember] = useState(null);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -28,12 +30,6 @@ export default function StaffManagement({ staff, onAddStaff, onDeleteStaff, curr
 
     setNewStaff({ name: '', email: '', password: '', role: 'Sales Representative', phone: '' });
     setIsAdding(false);
-  };
-
-  const handleDeleteStaffMember = (member) => {
-    if (confirm(`Are you sure you want to remove staff member "${member.name}" (${member.email})?`)) {
-      onDeleteStaff(member.id);
-    }
   };
 
   return (
@@ -211,7 +207,7 @@ export default function StaffManagement({ staff, onAddStaff, onDeleteStaff, curr
               <span className="text-[10px] text-muted-foreground">ID: {member.id}</span>
               {currentUser?.isAdmin && member.id !== 'stf-admin' && (
                 <button
-                  onClick={() => handleDeleteStaffMember(member)}
+                  onClick={() => setDeletingMember(member)}
                   className="text-xs text-destructive hover:underline font-medium flex items-center gap-1 cursor-pointer"
                 >
                   <Trash2 className="w-3.5 h-3.5" /> Remove
@@ -222,6 +218,23 @@ export default function StaffManagement({ staff, onAddStaff, onDeleteStaff, curr
           </div>
         ))}
       </div>
+
+      {/* Styled Confirmation Custom Modal */}
+      <ConfirmModal
+        isOpen={Boolean(deletingMember)}
+        onClose={() => setDeletingMember(null)}
+        onConfirm={() => {
+          if (deletingMember) {
+            onDeleteStaff(deletingMember.id);
+            setDeletingMember(null);
+          }
+        }}
+        title="Remove Staff Member"
+        message={`Are you sure you want to remove ${deletingMember?.name} (${deletingMember?.email}) from the sales team? They will no longer be able to log in or manage deals.`}
+        confirmText="Remove Staff"
+        cancelText="Cancel"
+        isDestructive={true}
+      />
 
     </div>
   );
