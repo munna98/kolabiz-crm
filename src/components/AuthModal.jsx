@@ -19,7 +19,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
     const inputEmail = email.trim().toLowerCase();
     const config = getSupabaseConfig();
 
-    // 1. Try Supabase Auth check if connected
+    // 1. Try Supabase Staff table login if connected
     if (config.isConfigured) {
       const dbUser = await verifyStaffLoginInSupabase(inputEmail, password);
       if (dbUser) {
@@ -30,7 +30,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
       }
     }
 
-    // 2. Local Fallback Check
+    // 2. Default Local Admin Fallback Check
     if (inputEmail === DEFAULT_ADMIN_EMAIL.toLowerCase() && password === DEFAULT_ADMIN_PASSWORD) {
       onLoginSuccess({
         id: 'stf-admin',
@@ -43,7 +43,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
       onClose();
     } else {
       setLoading(false);
-      setErrorMsg('Invalid login credentials. Please check your email and password.');
+      setErrorMsg('Invalid credentials. Please enter your registered staff email and password.');
     }
   };
 
@@ -59,9 +59,9 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
             </div>
             <div>
               <h3 className="text-lg font-bold font-sans text-foreground">
-                Kolabiz ERP Admin Portal
+                Kolabiz ERP Staff & Admin Portal
               </h3>
-              <p className="text-xs text-muted-foreground">Sign in to manage staff and system settings</p>
+              <p className="text-xs text-muted-foreground">Sign in with your staff email & password</p>
             </div>
           </div>
 
@@ -84,14 +84,14 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
 
           <div>
             <label className="block text-xs font-semibold text-foreground mb-1 flex items-center gap-1">
-              <Mail className="w-3.5 h-3.5 text-primary" /> Email Address
+              <Mail className="w-3.5 h-3.5 text-primary" /> Staff Email Address
             </label>
             <input
               type="email"
               required
               value={email}
               onChange={e => setEmail(e.target.value)}
-              placeholder="Enter email address"
+              placeholder="e.g. alex.rivers@kolabizerp.com"
               className="w-full px-3 py-2 bg-input border border-border rounded-md text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>

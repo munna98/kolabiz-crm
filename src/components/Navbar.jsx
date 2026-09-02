@@ -162,10 +162,10 @@ export default function Navbar({
               <button
                 onClick={onOpenAuthModal}
                 className="flex items-center space-x-1 px-2.5 py-1.5 rounded-md bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border text-xs font-medium transition-all cursor-pointer shrink-0"
-                title="Admin Sign In (kolabizerp@gmail.com)"
+                title="Staff & Admin Sign In"
               >
                 <LogIn className="w-3.5 h-3.5 text-primary" />
-                <span className="hidden sm:inline">Admin Sign In</span>
+                <span className="hidden sm:inline">Staff Sign In</span>
               </button>
             )}
 
