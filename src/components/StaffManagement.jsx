@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Users, UserPlus, Mail, Phone, ShieldCheck, Trash2, CheckCircle, AlertTriangle, RefreshCw } from 'lucide-react';
+import { Users, UserPlus, Mail, Phone, ShieldCheck, Trash2, Key, RefreshCw } from 'lucide-react';
 
 export default function StaffManagement({ staff, onAddStaff, onDeleteStaff, onClearDemoData, currentUser }) {
   const [newStaff, setNewStaff] = useState({
     name: '',
     email: '',
+    password: '',
     role: 'Sales Representative',
     phone: ''
   });
@@ -19,12 +20,13 @@ export default function StaffManagement({ staff, onAddStaff, onDeleteStaff, onCl
       id: 'stf-' + Date.now(),
       name: newStaff.name.trim(),
       email: newStaff.email.trim(),
+      password: newStaff.password.trim() || 'Kolabizerp@00916',
       role: newStaff.role,
       phone: newStaff.phone.trim() || '+91 98000 00000',
       status: 'Active'
     });
 
-    setNewStaff({ name: '', email: '', role: 'Sales Representative', phone: '' });
+    setNewStaff({ name: '', email: '', password: '', role: 'Sales Representative', phone: '' });
     setIsAdding(false);
   };
 
@@ -39,7 +41,7 @@ export default function StaffManagement({ staff, onAddStaff, onDeleteStaff, onCl
             <span>Kolabiz ERP Staff & Sales Team Management</span>
           </h2>
           <p className="text-xs text-muted-foreground">
-            Manage sales representatives, account executives, and system administrators for Kolabiz ERP.
+            Manage sales representatives, account executive passwords, and system administrators.
           </p>
         </div>
 
@@ -74,10 +76,10 @@ export default function StaffManagement({ staff, onAddStaff, onDeleteStaff, onCl
         <form onSubmit={handleSubmit} className="bg-card text-card-foreground p-5 rounded-lg border border-border space-y-4 shadow-md">
           <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
             <UserPlus className="w-4 h-4 text-primary" />
-            <span>Create New Staff Account</span>
+            <span>Create New Staff Account & Login Credentials</span>
           </h3>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-semibold text-muted-foreground mb-1">
                 Full Name *
@@ -106,6 +108,22 @@ export default function StaffManagement({ staff, onAddStaff, onDeleteStaff, onCl
               />
             </div>
 
+            <div>
+              <label className="block text-xs font-semibold text-muted-foreground mb-1 flex items-center gap-1">
+                <Key className="w-3.5 h-3.5 text-primary" /> Assign Password *
+              </label>
+              <input
+                type="text"
+                required
+                value={newStaff.password}
+                onChange={e => setNewStaff({ ...newStaff, password: e.target.value })}
+                placeholder="Set login password for staff"
+                className="w-full px-3 py-2 bg-input border border-border rounded-md text-xs font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-muted-foreground mb-1">
                 Role Title
@@ -149,7 +167,7 @@ export default function StaffManagement({ staff, onAddStaff, onDeleteStaff, onCl
               type="submit"
               className="px-4 py-1.5 bg-primary text-primary-foreground text-xs font-bold rounded-md hover:bg-primary/90 cursor-pointer"
             >
-              Save Staff Member
+              Save Staff Member & Password
             </button>
           </div>
         </form>
