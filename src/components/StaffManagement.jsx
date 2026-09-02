@@ -30,6 +30,12 @@ export default function StaffManagement({ staff, onAddStaff, onDeleteStaff, curr
     setIsAdding(false);
   };
 
+  const handleDeleteStaffMember = (member) => {
+    if (confirm(`Are you sure you want to remove staff member "${member.name}" (${member.email})?`)) {
+      onDeleteStaff(member.id);
+    }
+  };
+
   return (
     <div className="py-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-8">
       
@@ -205,7 +211,7 @@ export default function StaffManagement({ staff, onAddStaff, onDeleteStaff, curr
               <span className="text-[10px] text-muted-foreground">ID: {member.id}</span>
               {currentUser?.isAdmin && member.id !== 'stf-admin' && (
                 <button
-                  onClick={() => onDeleteStaff(member.id)}
+                  onClick={() => handleDeleteStaffMember(member)}
                   className="text-xs text-destructive hover:underline font-medium flex items-center gap-1 cursor-pointer"
                 >
                   <Trash2 className="w-3.5 h-3.5" /> Remove
