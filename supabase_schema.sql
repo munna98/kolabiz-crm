@@ -1,5 +1,5 @@
 -- =======================================================
--- KOLABIZ ERP GROWTHENGINE - SUPABASE PRODUCTION SCHEMA
+-- KOLABIZ ERP GROWTHENGINE - SUPABASE IDEMPOTENT PRODUCTION SCHEMA
 -- Execute this SQL in your Supabase SQL Editor
 -- =======================================================
 
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS public.activities (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
--- 3. Create STAFF table with password support
+-- 3. Create STAFF table
 CREATE TABLE IF NOT EXISTS public.staff (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
@@ -50,14 +50,17 @@ CREATE TABLE IF NOT EXISTS public.staff (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
--- Ensure password column exists if table was already created
-ALTER TABLE public.staff ADD COLUMN IF NOT EXISTS password TEXT DEFAULT 'Kolabizerp@00916';
-
 -- 4. Enable Row Level Security (RLS)
 ALTER TABLE public.leads ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.activities ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.staff ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if re-running
+DROP POLICY IF EXISTS "Allow public read and write access on leads" ON public.leads;
+DROP POLICY IF EXISTS "Allow public read and write access on activities" ON public.activities;
+DROP POLICY IF EXISTS "Allow public read and write access on staff" ON public.staff;
+
+-- Create Policies
 CREATE POLICY "Allow public read and write access on leads" ON public.leads FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow public read and write access on activities" ON public.activities FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow public read and write access on staff" ON public.staff FOR ALL USING (true) WITH CHECK (true);
@@ -67,7 +70,7 @@ ALTER PUBLICATION supabase_realtime ADD TABLE public.leads;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.activities;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.staff;
 
--- 6. Seed Default Admin Account with password
+-- 6. Insert Admin Account with default password
 INSERT INTO public.staff (id, name, email, password, role, phone, status)
 VALUES 
 ('stf-admin', 'Kolabiz Admin', 'kolabizerp@gmail.com', 'Kolabizerp@00916', 'System Administrator', '+91 98000 00000', 'Active')
