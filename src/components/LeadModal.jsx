@@ -12,8 +12,17 @@ import {
 import { INITIAL_STAGES, KAZ_PRODUCTS, LEAD_SOURCES, formatDateMMDDYYYY } from '../data/initialData';
 import ConfirmModal from './ConfirmModal';
 
-export default function LeadModal({ lead, isOpen, onClose, onSave, onDelete, staff = [] }) {
+export default function LeadModal({ lead, isOpen, onClose, onSave, onDelete, staff = [], currentUser = null }) {
   const staffNames = staff.length > 0 ? staff.map(s => s.name) : ['Alex Rivers', 'Priya Sharma', 'David Chen'];
+
+  // Determine default assigned rep: logged-in user if available, otherwise first staff member
+  const getDefaultRep = () => {
+    if (currentUser && currentUser.name) {
+      const match = staffNames.find(name => name.toLowerCase() === currentUser.name.toLowerCase());
+      if (match) return match;
+    }
+    return staffNames[0];
+  };
 
   const [formData, setFormData] = useState({
     clientName: '',
@@ -30,7 +39,7 @@ export default function LeadModal({ lead, isOpen, onClose, onSave, onDelete, sta
     source: LEAD_SOURCES[0],
     lastContactDate: new Date().toISOString().split('T')[0],
     nextFollowUp: new Date(Date.now() + 86400000 * 2).toISOString().split('T')[0],
-    assignedTo: staffNames[0],
+    assignedTo: getDefaultRep(),
     notes: '',
     activities: [],
     clientHealth: 'Green',
@@ -46,12 +55,14 @@ export default function LeadModal({ lead, isOpen, onClose, onSave, onDelete, sta
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
 
   useEffect(() => {
+    const activeRep = getDefaultRep();
+
     if (lead) {
       setFormData({ 
         product: KAZ_PRODUCTS[0],
         deploymentType: 'On-Premise',
         source: LEAD_SOURCES[0],
-        assignedTo: staffNames[0],
+        assignedTo: activeRep,
         location: '',
         ...lead 
       });
@@ -71,7 +82,7 @@ export default function LeadModal({ lead, isOpen, onClose, onSave, onDelete, sta
         source: LEAD_SOURCES[0],
         lastContactDate: new Date().toISOString().split('T')[0],
         nextFollowUp: new Date(Date.now() + 86400000 * 2).toISOString().split('T')[0],
-        assignedTo: staffNames[0],
+        assignedTo: activeRep,
         notes: '',
         activities: [],
         clientHealth: 'Green',
@@ -79,7 +90,7 @@ export default function LeadModal({ lead, isOpen, onClose, onSave, onDelete, sta
         supportRenewalDate: '2027-09-01'
       });
     }
-  }, [lead, isOpen]);
+  }, [lead, isOpen, currentUser]);
 
   if (!isOpen) return null;
 
@@ -101,7 +112,7 @@ export default function LeadModal({ lead, isOpen, onClose, onSave, onDelete, sta
       type: newActivity.type,
       date: new Date().toISOString().split('T')[0],
       summary: newActivity.summary,
-      author: formData.assignedTo || 'Sales Agent'
+      author: formData.assignedTo || currentUser?.name || 'Sales Agent'
     };
 
     setFormData(prev => ({

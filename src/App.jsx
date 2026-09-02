@@ -352,6 +352,7 @@ export default function App() {
         onSave={handleSaveLead}
         onDelete={handleDeleteLead}
         staff={staff}
+        currentUser={currentUser}
       />
 
       {/* Supabase Connection Modal */}
