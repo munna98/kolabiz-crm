@@ -126,10 +126,10 @@ export default function LeadModal({ lead, isOpen, onClose, onSave, onDelete, sta
               </div>
               <div>
                 <h3 className="text-lg font-bold font-sans text-foreground">
-                  {lead ? `Manage Deal: ${lead.clientName}` : 'Add New Deal'}
+                  {lead ? `Manage Lead: ${lead.clientName}` : 'Add New Lead'}
                 </h3>
                 <p className="text-xs text-muted-foreground">
-                  {lead ? `ID: ${lead.id}` : 'Select product & enter deal parameters'}
+                  {lead ? `ID: ${lead.id}` : 'Select product & enter lead parameters'}
                 </p>
               </div>
             </div>
@@ -239,7 +239,7 @@ export default function LeadModal({ lead, isOpen, onClose, onSave, onDelete, sta
 
               <div>
                 <label className="block text-xs font-semibold text-foreground mb-1">
-                  Deal Description / Sub-Title
+                  Lead Description / Sub-Title
                 </label>
                 <input
                   type="text"
@@ -425,7 +425,7 @@ export default function LeadModal({ lead, isOpen, onClose, onSave, onDelete, sta
                   className="flex items-center space-x-1.5 px-3 py-2 bg-destructive text-destructive-foreground hover:bg-destructive/90 text-xs font-medium rounded-md shadow-sm cursor-pointer"
                 >
                   <Trash2 className="w-4 h-4" />
-                  <span>Delete Deal</span>
+                  <span>Delete Lead</span>
                 </button>
               ) : <div />}
 
@@ -442,7 +442,7 @@ export default function LeadModal({ lead, isOpen, onClose, onSave, onDelete, sta
                   className="flex items-center space-x-1.5 px-5 py-2 bg-primary text-primary-foreground hover:bg-primary/90 font-bold text-xs rounded-md shadow-md cursor-pointer"
                 >
                   <Save className="w-4 h-4" />
-                  <span>Save Deal</span>
+                  <span>Save Lead</span>
                 </button>
               </div>
             </div>
@@ -452,7 +452,7 @@ export default function LeadModal({ lead, isOpen, onClose, onSave, onDelete, sta
         </div>
       </div>
 
-      {/* Styled Confirmation Custom Modal for Deal Deletion */}
+      {/* Styled Confirmation Custom Modal for Lead Deletion */}
       <ConfirmModal
         isOpen={isConfirmingDelete}
         onClose={() => setIsConfirmingDelete(false)}
@@ -463,9 +463,9 @@ export default function LeadModal({ lead, isOpen, onClose, onSave, onDelete, sta
             onClose();
           }
         }}
-        title="Delete ERP Deal"
-        message={`Are you sure you want to delete the deal for "${lead?.clientName}"? This action cannot be undone.`}
-        confirmText="Delete Deal"
+        title="Delete ERP Lead"
+        message={`Are you sure you want to delete the lead for "${lead?.clientName}"? This action cannot be undone.`}
+        confirmText="Delete Lead"
         cancelText="Cancel"
         isDestructive={true}
       />

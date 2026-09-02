@@ -43,14 +43,14 @@ export default function KanbanBoard({
         <div>
           <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
             <span>Kolabiz License & Implementation Pipeline</span>
-            <span className="text-xs font-normal text-muted-foreground">({filteredLeads.length} deals)</span>
+            <span className="text-xs font-normal text-muted-foreground">({filteredLeads.length} leads)</span>
           </h2>
-          <p className="text-xs text-muted-foreground">Manage deal stages, locations, product variants, contract negotiations, and implementation readiness.</p>
+          <p className="text-xs text-muted-foreground">Manage lead stages, locations, product variants, contract negotiations, and implementation readiness.</p>
         </div>
 
         {/* Priority Legend */}
         <div className="flex items-center space-x-2 text-xs">
-          <span className="text-muted-foreground">Deal Intent:</span>
+          <span className="text-muted-foreground">Lead Intent:</span>
           <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-destructive/15 text-destructive border border-destructive/30 flex items-center gap-1">
             <Flame className="w-3 h-3 text-destructive" /> Hot
           </span>
@@ -97,7 +97,7 @@ export default function KanbanBoard({
               <div className="flex-1 space-y-2.5 overflow-y-auto max-h-[calc(100vh-280px)] pr-1">
                 {stageLeads.length === 0 ? (
                   <div className="p-4 rounded-md border border-dashed border-border text-center text-xs text-muted-foreground my-4">
-                    No deals in stage
+                    No leads in stage
                   </div>
                 ) : (
                   stageLeads.map((lead) => {
@@ -166,7 +166,7 @@ export default function KanbanBoard({
                           </span>
                         </div>
 
-                        {/* Deal Value & Rep */}
+                        {/* Contract Value & Rep */}
                         <div className="flex items-center justify-between text-xs pt-2 border-t border-border">
                           <span className="font-bold text-primary font-mono">
                             ₹{(lead.value || 0).toLocaleString('en-IN')}

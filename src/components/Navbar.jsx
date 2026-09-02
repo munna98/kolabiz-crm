@@ -40,17 +40,17 @@ export default function Navbar({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const supabaseConfig = getSupabaseConfig();
 
-  const activeDeals = leads.filter(l => l.stage !== 'closed_won' && l.stage !== 'closed_lost');
-  const pipelineValue = activeDeals.reduce((sum, l) => sum + (l.value || 0), 0);
+  const activeLeads = leads.filter(l => l.stage !== 'closed_won' && l.stage !== 'closed_lost');
+  const pipelineValue = activeLeads.reduce((sum, l) => sum + (l.value || 0), 0);
   
   const todayStr = new Date().toISOString().split('T')[0];
-  const overdueFollowups = activeDeals.filter(l => l.nextFollowUp && l.nextFollowUp < todayStr);
+  const overdueFollowups = activeLeads.filter(l => l.nextFollowUp && l.nextFollowUp < todayStr);
   
   const closedWonClients = leads.filter(l => l.stage === 'closed_won');
   const atRiskClients = closedWonClients.filter(l => l.clientHealth === 'Amber' || l.clientHealth === 'Red');
 
   const navItems = [
-    { id: 'pipeline', label: 'ERP Deal Pipeline', icon: Kanban, badge: activeDeals.length },
+    { id: 'pipeline', label: 'ERP Lead Pipeline', icon: Kanban, badge: activeLeads.length },
     { id: 'followups', label: 'ERP Follow-Up Engine', icon: Clock, badge: overdueFollowups.length, badgeUrgent: overdueFollowups.length > 0 },
     { id: 'retention', label: 'Client SLA & Retention', icon: HeartHandshake, badge: atRiskClients.length, badgeWarning: atRiskClients.length > 0 },
     { id: 'proposal', label: 'ERP Proposal Calculator', icon: Calculator },
@@ -116,8 +116,8 @@ export default function Navbar({
 
             <div className="flex items-center space-x-2 px-3 py-1.5 rounded-md bg-secondary/60 border border-border text-xs">
               <TrendingUp className="w-3.5 h-3.5 text-primary" />
-              <span className="text-muted-foreground">Active Deals:</span>
-              <span className="font-bold text-foreground">{activeDeals.length}</span>
+              <span className="text-muted-foreground">Active Leads:</span>
+              <span className="font-bold text-foreground">{activeLeads.length}</span>
             </div>
 
             {overdueFollowups.length > 0 ? (
@@ -134,13 +134,13 @@ export default function Navbar({
             )}
           </div>
 
-          {/* Search, Auth, Theme Toggle, & Add Deal Button */}
+          {/* Search, Auth, Theme Toggle, & Add Lead Button */}
           <div className="flex items-center space-x-2">
             <div className="relative flex-1 md:w-48">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="Search ERP deals..."
+                placeholder="Search ERP leads..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-9 pr-3 py-1.5 bg-input border border-border rounded-md text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
@@ -186,7 +186,7 @@ export default function Navbar({
               className="flex items-center space-x-1.5 px-3.5 py-1.5 bg-primary text-primary-foreground hover:bg-primary/90 font-medium text-xs rounded-md shadow transition-all cursor-pointer shrink-0"
             >
               <Plus className="w-4 h-4" />
-              <span className="hidden sm:inline">Add Deal</span>
+              <span className="hidden sm:inline">Add Lead</span>
               <span className="sm:hidden">Add</span>
             </button>
           </div>

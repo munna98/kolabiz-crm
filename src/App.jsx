@@ -123,13 +123,13 @@ export default function App() {
   const handleLoginSuccess = (userObj) => {
     setCurrentUser(userObj);
     localStorage.setItem('kolabiz_user', JSON.stringify(userObj));
-    showToast(`Welcome Admin! Signed in as ${userObj.email}`);
+    showToast(`Welcome! Signed in as ${userObj.name}`);
   };
 
   const handleLogout = () => {
     setCurrentUser(null);
     localStorage.removeItem('kolabiz_user');
-    showToast('Signed out of Admin session.');
+    showToast('Signed out of session.');
   };
 
   const handleAddStaff = async (newMember) => {
@@ -174,7 +174,7 @@ export default function App() {
       // Edit existing
       targetLead = leadData;
       updatedLeads = leads.map(l => (l.id === leadData.id ? leadData : l));
-      showToast(`Updated deal for ${leadData.clientName}`);
+      showToast(`Updated lead for ${leadData.clientName}`);
     } else {
       // Create new
       targetLead = {
@@ -182,7 +182,7 @@ export default function App() {
         id: 'erp-' + Date.now()
       };
       updatedLeads = [targetLead, ...leads];
-      showToast(`Created new deal for ${leadData.clientName}`);
+      showToast(`Created new lead for ${leadData.clientName}`);
     }
 
     setLeads(updatedLeads);
@@ -198,7 +198,7 @@ export default function App() {
     const target = leads.find(l => l.id === id);
     const updated = leads.filter(l => l.id !== id);
     setLeads(updated);
-    showToast(`Deleted deal ${target ? target.clientName : ''}`);
+    showToast(`Deleted lead ${target ? target.clientName : ''}`);
 
     const config = getSupabaseConfig();
     if (config.isConfigured) {
