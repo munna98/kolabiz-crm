@@ -134,13 +134,13 @@ export default function Navbar({
             )}
           </div>
 
-          {/* Search, Auth, Theme Toggle, & Add Lead Button */}
+          {/* Search, Auth, Theme Toggle, & Add Deal Button */}
           <div className="flex items-center space-x-2">
             <div className="relative flex-1 md:w-48">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="Search ERP leads..."
+                placeholder="Search ERP deals..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-9 pr-3 py-1.5 bg-input border border-border rounded-md text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
@@ -186,7 +186,7 @@ export default function Navbar({
               className="flex items-center space-x-1.5 px-3.5 py-1.5 bg-primary text-primary-foreground hover:bg-primary/90 font-medium text-xs rounded-md shadow transition-all cursor-pointer shrink-0"
             >
               <Plus className="w-4 h-4" />
-              <span className="hidden sm:inline">Add ERP Lead</span>
+              <span className="hidden sm:inline">Add Deal</span>
               <span className="sm:hidden">Add</span>
             </button>
           </div>
