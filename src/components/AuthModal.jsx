@@ -1,23 +1,37 @@
 import React, { useState } from 'react';
 import { ShieldCheck, X, Lock, Mail, Sparkles, LogIn } from 'lucide-react';
 import { DEFAULT_ADMIN_EMAIL, DEFAULT_ADMIN_PASSWORD } from '../data/initialData';
+import { verifyStaffLoginInSupabase, getSupabaseConfig } from '../lib/supabase';
 
 export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+  const [loading, setLoading] = useState(false);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg('');
+    setLoading(true);
 
-    const targetEmail = DEFAULT_ADMIN_EMAIL.toLowerCase();
     const inputEmail = email.trim().toLowerCase();
+    const config = getSupabaseConfig();
 
-    // Admin Credential Check
-    if (inputEmail === targetEmail && password === DEFAULT_ADMIN_PASSWORD) {
+    // 1. Try Supabase Auth check if connected
+    if (config.isConfigured) {
+      const dbUser = await verifyStaffLoginInSupabase(inputEmail, password);
+      if (dbUser) {
+        onLoginSuccess(dbUser);
+        setLoading(false);
+        onClose();
+        return;
+      }
+    }
+
+    // 2. Local Fallback Check
+    if (inputEmail === DEFAULT_ADMIN_EMAIL.toLowerCase() && password === DEFAULT_ADMIN_PASSWORD) {
       onLoginSuccess({
         id: 'stf-admin',
         name: 'Kolabiz Admin',
@@ -25,9 +39,11 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
         role: 'System Administrator',
         isAdmin: true
       });
+      setLoading(false);
       onClose();
     } else {
-      setErrorMsg(`Invalid credentials. Check email (${DEFAULT_ADMIN_EMAIL}) and password.`);
+      setLoading(false);
+      setErrorMsg(`Invalid credentials. If using Supabase, ensure password matches the staff table record.`);
     }
   };
 
@@ -45,7 +61,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
               <h3 className="text-lg font-bold font-sans text-foreground">
                 Kolabiz ERP Admin Portal
               </h3>
-              <p className="text-xs text-muted-foreground">Sign in to manage staff and system settings</p>
+              <p className="text-xs text-muted-foreground">Sign in via Supabase or Local Admin credentials</p>
             </div>
           </div>
 
@@ -96,9 +112,9 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
 
           <div className="p-3 rounded-md bg-muted/40 border border-border text-[11px] text-muted-foreground space-y-1">
             <span className="font-bold text-foreground block flex items-center gap-1">
-              <Sparkles className="w-3 h-3 text-primary" /> System Admin Login:
+              <Sparkles className="w-3 h-3 text-primary" /> Live Supabase Password Sync Active:
             </span>
-            <div>Email: <code className="text-foreground bg-muted px-1 rounded">{DEFAULT_ADMIN_EMAIL}</code></div>
+            <p>You can change passwords directly in your Supabase <strong>public.staff</strong> table or SQL editor!</p>
           </div>
 
           <div className="pt-3 border-t border-border flex items-center justify-end space-x-3">
@@ -111,10 +127,11 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
             </button>
             <button
               type="submit"
-              className="flex items-center space-x-1.5 px-5 py-2 bg-primary text-primary-foreground hover:bg-primary/90 font-bold text-xs rounded-md shadow cursor-pointer"
+              disabled={loading}
+              className="flex items-center space-x-1.5 px-5 py-2 bg-primary text-primary-foreground hover:bg-primary/90 font-bold text-xs rounded-md shadow cursor-pointer disabled:opacity-50"
             >
               <LogIn className="w-4 h-4" />
-              <span>Sign In</span>
+              <span>{loading ? 'Verifying...' : 'Sign In'}</span>
             </button>
           </div>
 

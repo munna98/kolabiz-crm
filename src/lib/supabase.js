@@ -195,7 +195,7 @@ export const clearAllLeadsInSupabase = async () => {
 };
 
 // ----------------------------------------------------
-// SUPABASE CRUD OPERATIONS - STAFF MEMBERS
+// SUPABASE CRUD & AUTH OPERATIONS - STAFF MEMBERS
 // ----------------------------------------------------
 
 export const fetchStaffFromSupabase = async () => {
@@ -214,6 +214,7 @@ export const fetchStaffFromSupabase = async () => {
       id: s.id,
       name: s.name,
       email: s.email,
+      password: s.password,
       role: s.role,
       phone: s.phone,
       status: s.status
@@ -235,6 +236,7 @@ export const saveStaffToSupabase = async (member) => {
         id: member.id,
         name: member.name,
         email: member.email,
+        password: member.password || 'Kolabizerp@00916',
         role: member.role,
         phone: member.phone,
         status: member.status
@@ -259,6 +261,34 @@ export const deleteStaffFromSupabase = async (id) => {
   } catch (err) {
     console.error('Error deleting staff from Supabase:', err);
     return false;
+  }
+};
+
+// Live password check against Supabase staff table
+export const verifyStaffLoginInSupabase = async (email, password) => {
+  const client = getSupabaseClient();
+  if (!client) return null;
+
+  try {
+    const { data, error } = await client
+      .from('staff')
+      .select('*')
+      .eq('email', email.trim().toLowerCase())
+      .eq('password', password)
+      .single();
+
+    if (error || !data) return null;
+
+    return {
+      id: data.id,
+      name: data.name,
+      email: data.email,
+      role: data.role,
+      isAdmin: data.role.toLowerCase().includes('admin') || data.email === 'kolabizerp@gmail.com'
+    };
+  } catch (err) {
+    console.error('Error verifying login in Supabase:', err);
+    return null;
   }
 };
 

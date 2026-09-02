@@ -38,18 +38,22 @@ CREATE TABLE IF NOT EXISTS public.activities (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
--- 3. Create STAFF table
+-- 3. Create STAFF table with password support
 CREATE TABLE IF NOT EXISTS public.staff (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
+    password TEXT DEFAULT 'Kolabizerp@00916',
     role TEXT DEFAULT 'Sales Representative',
     phone TEXT,
     status TEXT DEFAULT 'Active',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
--- 4. Enable Row Level Security (RLS) and allow public access for production
+-- Ensure password column exists if table was already created
+ALTER TABLE public.staff ADD COLUMN IF NOT EXISTS password TEXT DEFAULT 'Kolabizerp@00916';
+
+-- 4. Enable Row Level Security (RLS)
 ALTER TABLE public.leads ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.activities ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.staff ENABLE ROW LEVEL SECURITY;
@@ -63,8 +67,8 @@ ALTER PUBLICATION supabase_realtime ADD TABLE public.leads;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.activities;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.staff;
 
--- 6. Seed Default Admin Account
-INSERT INTO public.staff (id, name, email, role, phone, status)
+-- 6. Seed Default Admin Account with password
+INSERT INTO public.staff (id, name, email, password, role, phone, status)
 VALUES 
-('stf-admin', 'Kolabiz Admin', 'kolabizerp@gmail.com', 'System Administrator', '+91 98000 00000', 'Active')
-ON CONFLICT (id) DO NOTHING;
+('stf-admin', 'Kolabiz Admin', 'kolabizerp@gmail.com', 'Kolabizerp@00916', 'System Administrator', '+91 98000 00000', 'Active')
+ON CONFLICT (id) DO UPDATE SET password = EXCLUDED.password;
