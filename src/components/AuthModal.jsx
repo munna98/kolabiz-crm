@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, X, Lock, Mail, Sparkles, LogIn } from 'lucide-react';
+import { ShieldCheck, X, Lock, Mail, LogIn } from 'lucide-react';
 import { DEFAULT_ADMIN_EMAIL, DEFAULT_ADMIN_PASSWORD } from '../data/initialData';
 import { verifyStaffLoginInSupabase, getSupabaseConfig } from '../lib/supabase';
 
@@ -43,7 +43,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
       onClose();
     } else {
       setLoading(false);
-      setErrorMsg(`Invalid credentials. If using Supabase, ensure password matches the staff table record.`);
+      setErrorMsg('Invalid login credentials. Please check your email and password.');
     }
   };
 
@@ -61,7 +61,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
               <h3 className="text-lg font-bold font-sans text-foreground">
                 Kolabiz ERP Admin Portal
               </h3>
-              <p className="text-xs text-muted-foreground">Sign in via Supabase or Local Admin credentials</p>
+              <p className="text-xs text-muted-foreground">Sign in to manage staff and system settings</p>
             </div>
           </div>
 
@@ -91,7 +91,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
               required
               value={email}
               onChange={e => setEmail(e.target.value)}
-              placeholder={DEFAULT_ADMIN_EMAIL}
+              placeholder="Enter email address"
               className="w-full px-3 py-2 bg-input border border-border rounded-md text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
@@ -108,13 +108,6 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
               placeholder="••••••••••••"
               className="w-full px-3 py-2 bg-input border border-border rounded-md text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
             />
-          </div>
-
-          <div className="p-3 rounded-md bg-muted/40 border border-border text-[11px] text-muted-foreground space-y-1">
-            <span className="font-bold text-foreground block flex items-center gap-1">
-              <Sparkles className="w-3 h-3 text-primary" /> Live Supabase Password Sync Active:
-            </span>
-            <p>You can change passwords directly in your Supabase <strong>public.staff</strong> table or SQL editor!</p>
           </div>
 
           <div className="pt-3 border-t border-border flex items-center justify-end space-x-3">
