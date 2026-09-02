@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ShieldCheck, X, Lock, Mail, Sparkles, LogIn } from 'lucide-react';
+import { DEFAULT_ADMIN_EMAIL, DEFAULT_ADMIN_PASSWORD } from '../data/initialData';
 
 export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
   const [email, setEmail] = useState('');
@@ -12,18 +13,21 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
     e.preventDefault();
     setErrorMsg('');
 
+    const targetEmail = DEFAULT_ADMIN_EMAIL.toLowerCase();
+    const inputEmail = email.trim().toLowerCase();
+
     // Admin Credential Check
-    if (email.trim().toLowerCase() === 'kolabizerp@gmail.com' && password === 'Kolabizerp@00916') {
+    if (inputEmail === targetEmail && password === DEFAULT_ADMIN_PASSWORD) {
       onLoginSuccess({
         id: 'stf-admin',
         name: 'Kolabiz Admin',
-        email: 'kolabizerp@gmail.com',
+        email: DEFAULT_ADMIN_EMAIL,
         role: 'System Administrator',
         isAdmin: true
       });
       onClose();
     } else {
-      setErrorMsg('Invalid login credentials. Default Admin: kolabizerp@gmail.com / Kolabizerp@00916');
+      setErrorMsg(`Invalid credentials. Check email (${DEFAULT_ADMIN_EMAIL}) and password.`);
     }
   };
 
@@ -71,7 +75,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
               required
               value={email}
               onChange={e => setEmail(e.target.value)}
-              placeholder="kolabizerp@gmail.com"
+              placeholder={DEFAULT_ADMIN_EMAIL}
               className="w-full px-3 py-2 bg-input border border-border rounded-md text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
@@ -92,10 +96,9 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
 
           <div className="p-3 rounded-md bg-muted/40 border border-border text-[11px] text-muted-foreground space-y-1">
             <span className="font-bold text-foreground block flex items-center gap-1">
-              <Sparkles className="w-3 h-3 text-primary" /> Default System Admin Access:
+              <Sparkles className="w-3 h-3 text-primary" /> System Admin Login:
             </span>
-            <div>Email: <code className="text-foreground bg-muted px-1 rounded">kolabizerp@gmail.com</code></div>
-            <div>Pass: <code className="text-foreground bg-muted px-1 rounded">Kolabizerp@00916</code></div>
+            <div>Email: <code className="text-foreground bg-muted px-1 rounded">{DEFAULT_ADMIN_EMAIL}</code></div>
           </div>
 
           <div className="pt-3 border-t border-border flex items-center justify-end space-x-3">

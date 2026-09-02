@@ -1,5 +1,5 @@
 -- =======================================================
--- KOLABIZ ERP GROWTHENGINE - SUPABASE DATABASE SCHEMA
+-- KOLABIZ ERP GROWTHENGINE - SUPABASE PRODUCTION SCHEMA
 -- Execute this SQL in your Supabase SQL Editor
 -- =======================================================
 
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS public.staff (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
--- 4. Enable Row Level Security (RLS) and allow public access for demo
+-- 4. Enable Row Level Security (RLS) and allow public access for production
 ALTER TABLE public.leads ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.activities ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.staff ENABLE ROW LEVEL SECURITY;
@@ -63,11 +63,8 @@ ALTER PUBLICATION supabase_realtime ADD TABLE public.leads;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.activities;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.staff;
 
--- 6. Seed Default Admin & Initial Staff
+-- 6. Seed Default Admin Account
 INSERT INTO public.staff (id, name, email, role, phone, status)
 VALUES 
-('stf-admin', 'Kolabiz Admin', 'kolabizerp@gmail.com', 'System Administrator', '+91 98000 00000', 'Active'),
-('stf-101', 'Alex Rivers', 'alex.rivers@kolabizerp.com', 'Senior ERP Consultant', '+91 98765 00001', 'Active'),
-('stf-102', 'Priya Sharma', 'priya.sharma@kolabizerp.com', 'Enterprise Account Executive', '+91 98765 00002', 'Active'),
-('stf-103', 'David Chen', 'david.chen@kolabizerp.com', 'Technical Sales Engineer', '+91 98765 00003', 'Active')
+('stf-admin', 'Kolabiz Admin', 'kolabizerp@gmail.com', 'System Administrator', '+91 98000 00000', 'Active')
 ON CONFLICT (id) DO NOTHING;
