@@ -3,6 +3,7 @@ import {
   HeartHandshake, 
   ShieldCheck 
 } from 'lucide-react';
+import { formatDateMMDDYYYY } from '../data/initialData';
 
 export default function ClientRetention({ leads, onSelectLead, onUpdateClientHealth }) {
   const closedWonClients = leads.filter(l => l.stage === 'closed_won');
@@ -80,7 +81,7 @@ export default function ClientRetention({ leads, onSelectLead, onUpdateClientHea
 
         {closedWonClients.length === 0 ? (
           <div className="bg-card p-8 rounded-lg text-center border border-border text-muted-foreground text-xs">
-            No closed won ERP clients yet. Move deals to "Closed Won" on the Kanban pipeline!
+            No closed won ERP clients yet. Move leads to "Closed Won" on the Kanban pipeline!
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -127,7 +128,7 @@ export default function ClientRetention({ leads, onSelectLead, onUpdateClientHea
                     </div>
                     <div>
                       <span className="text-[10px] text-muted-foreground block">Annual Renewal Date:</span>
-                      <span className="font-bold text-foreground font-mono">{client.supportRenewalDate || '2027-08-15'}</span>
+                      <span className="font-bold text-foreground font-mono">{formatDateMMDDYYYY(client.supportRenewalDate || '2027-08-15')}</span>
                     </div>
                   </div>
 

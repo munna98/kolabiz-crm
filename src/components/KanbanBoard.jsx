@@ -1,5 +1,5 @@
 import React from 'react';
-import { INITIAL_STAGES } from '../data/initialData';
+import { INITIAL_STAGES, formatDateMMDDYYYY } from '../data/initialData';
 import { 
   Clock, 
   User, 
@@ -130,7 +130,7 @@ export default function KanbanBoard({
                               'bg-muted text-muted-foreground'
                             }`}>
                               <Clock className="w-3 h-3" />
-                              {isOverdue ? 'Overdue!' : isToday ? 'Due Today' : lead.nextFollowUp}
+                              {isOverdue ? 'Overdue!' : isToday ? 'Due Today' : formatDateMMDDYYYY(lead.nextFollowUp)}
                             </span>
                           )}
                         </div>

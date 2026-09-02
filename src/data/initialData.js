@@ -35,6 +35,18 @@ export const INITIAL_LEADS = [];
 export const DEFAULT_ADMIN_EMAIL = 'kolabizerp@gmail.com';
 export const DEFAULT_ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'Kolabizerp@00916';
 
+// DATE FORMATTER HELPER: Converts YYYY-MM-DD to MM-DD-YYYY
+export const formatDateMMDDYYYY = (dateStr) => {
+  if (!dateStr) return '';
+  const cleanStr = String(dateStr).split('T')[0];
+  const parts = cleanStr.split('-');
+  if (parts.length === 3 && parts[0].length === 4) {
+    // [YYYY, MM, DD] -> MM-DD-YYYY
+    return `${parts[1]}-${parts[2]}-${parts[0]}`;
+  }
+  return dateStr;
+};
+
 export const FOLLOWUP_TEMPLATES = [
   {
     id: 't1',

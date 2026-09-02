@@ -8,7 +8,7 @@ import {
   Mail, 
   Sparkles 
 } from 'lucide-react';
-import { FOLLOWUP_TEMPLATES } from '../data/initialData';
+import { FOLLOWUP_TEMPLATES, formatDateMMDDYYYY } from '../data/initialData';
 
 export default function FollowUpSchedule({ leads, onSelectLead, onUpdateFollowUp }) {
   const todayStr = new Date().toISOString().split('T')[0];
@@ -100,7 +100,7 @@ export default function FollowUpSchedule({ leads, onSelectLead, onUpdateFollowUp
                       <div className="flex items-center space-x-2">
                         <span className="font-bold text-xs text-foreground">{lead.clientName}</span>
                         <span className="text-[10px] px-1.5 py-0.5 rounded bg-destructive text-destructive-foreground font-mono">
-                          Due: {lead.nextFollowUp}
+                          Due: {formatDateMMDDYYYY(lead.nextFollowUp)}
                         </span>
                       </div>
                       <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{lead.title}</p>
@@ -181,7 +181,7 @@ export default function FollowUpSchedule({ leads, onSelectLead, onUpdateFollowUp
                     <span className="text-muted-foreground text-[11px] block">{lead.title}</span>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <span className="text-[10px] font-mono text-primary font-bold">{lead.nextFollowUp}</span>
+                    <span className="text-[10px] font-mono text-primary font-bold">{formatDateMMDDYYYY(lead.nextFollowUp)}</span>
                     <button
                       onClick={() => setActiveLeadForTemplate(lead)}
                       className="text-[10px] text-muted-foreground hover:text-primary"

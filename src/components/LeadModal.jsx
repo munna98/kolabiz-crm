@@ -9,7 +9,7 @@ import {
   Package,
   MapPin
 } from 'lucide-react';
-import { INITIAL_STAGES, KAZ_PRODUCTS, LEAD_SOURCES } from '../data/initialData';
+import { INITIAL_STAGES, KAZ_PRODUCTS, LEAD_SOURCES, formatDateMMDDYYYY } from '../data/initialData';
 import ConfirmModal from './ConfirmModal';
 
 export default function LeadModal({ lead, isOpen, onClose, onSave, onDelete, staff = [] }) {
@@ -405,7 +405,7 @@ export default function LeadModal({ lead, isOpen, onClose, onSave, onDelete, sta
                       <div>
                         <div className="flex items-center space-x-2">
                           <span className="font-bold text-primary">{act.type}</span>
-                          <span className="text-[10px] text-muted-foreground">{act.date} • {act.author}</span>
+                          <span className="text-[10px] text-muted-foreground">{formatDateMMDDYYYY(act.date)} • {act.author}</span>
                         </div>
                         <p className="text-foreground mt-0.5">{act.summary}</p>
                       </div>
