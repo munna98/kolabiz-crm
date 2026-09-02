@@ -6,7 +6,8 @@ import {
   Plus, 
   Clock, 
   Sparkles,
-  Package
+  Package,
+  MapPin
 } from 'lucide-react';
 import { INITIAL_STAGES, KAZ_PRODUCTS, LEAD_SOURCES } from '../data/initialData';
 import ConfirmModal from './ConfirmModal';
@@ -19,6 +20,7 @@ export default function LeadModal({ lead, isOpen, onClose, onSave, onDelete, sta
     contactPerson: '',
     email: '',
     phone: '',
+    location: '',
     product: KAZ_PRODUCTS[0],
     title: '',
     value: 15000,
@@ -50,6 +52,7 @@ export default function LeadModal({ lead, isOpen, onClose, onSave, onDelete, sta
         deploymentType: 'On-Premise',
         source: LEAD_SOURCES[0],
         assignedTo: staffNames[0],
+        location: '',
         ...lead 
       });
     } else {
@@ -58,6 +61,7 @@ export default function LeadModal({ lead, isOpen, onClose, onSave, onDelete, sta
         contactPerson: '',
         email: '',
         phone: '',
+        location: '',
         product: KAZ_PRODUCTS[0],
         title: '',
         value: 15000,
@@ -172,8 +176,22 @@ export default function LeadModal({ lead, isOpen, onClose, onSave, onDelete, sta
               </div>
             </div>
 
-            {/* Row 2: Email & Phone */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Row 2: Location, Email & Phone */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-foreground mb-1 flex items-center gap-1">
+                  <MapPin className="w-3.5 h-3.5 text-primary" /> Location / City *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.location}
+                  onChange={e => setFormData({ ...formData, location: e.target.value })}
+                  placeholder="e.g. Mumbai, Maharashtra"
+                  className="w-full px-3 py-2 bg-input border border-border rounded-md text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                />
+              </div>
+
               <div>
                 <label className="block text-xs font-semibold text-foreground mb-1">
                   Email Address

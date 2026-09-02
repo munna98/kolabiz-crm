@@ -8,7 +8,8 @@ import {
   Snowflake,
   Server,
   Cloud,
-  Package
+  Package,
+  MapPin
 } from 'lucide-react';
 
 export default function KanbanBoard({ 
@@ -27,6 +28,7 @@ export default function KanbanBoard({
       lead.clientName.toLowerCase().includes(q) ||
       lead.contactPerson.toLowerCase().includes(q) ||
       lead.title.toLowerCase().includes(q) ||
+      (lead.location && lead.location.toLowerCase().includes(q)) ||
       (lead.product && lead.product.toLowerCase().includes(q)) ||
       lead.assignedTo.toLowerCase().includes(q) ||
       (lead.source && lead.source.toLowerCase().includes(q))
@@ -43,7 +45,7 @@ export default function KanbanBoard({
             <span>Kolabiz License & Implementation Pipeline</span>
             <span className="text-xs font-normal text-muted-foreground">({filteredLeads.length} deals)</span>
           </h2>
-          <p className="text-xs text-muted-foreground">Manage deal stages, product variants, contract negotiations, and implementation readiness.</p>
+          <p className="text-xs text-muted-foreground">Manage deal stages, locations, product variants, contract negotiations, and implementation readiness.</p>
         </div>
 
         {/* Priority Legend */}
@@ -134,7 +136,7 @@ export default function KanbanBoard({
                         </div>
 
                         {/* Product Variant Badge */}
-                        <div className="mb-1.5">
+                        <div className="mb-1.5 flex items-center gap-1 flex-wrap">
                           <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/20 flex items-center gap-1 w-fit">
                             <Package className="w-3 h-3" />
                             {lead.product || 'Kolabiz ERP'}
@@ -149,11 +151,18 @@ export default function KanbanBoard({
                           {lead.title}
                         </p>
 
-                        {/* Deployment Model Badge */}
-                        <div className="flex items-center space-x-2 my-2 text-[10px]">
+                        {/* Location & Deployment Model Badges */}
+                        <div className="flex flex-wrap items-center gap-1.5 my-2 text-[10px]">
+                          {lead.location && (
+                            <span className="px-1.5 py-0.5 rounded bg-muted text-foreground font-medium flex items-center gap-1 truncate max-w-[140px]" title={lead.location}>
+                              <MapPin className="w-2.5 h-2.5 text-primary shrink-0" />
+                              <span className="truncate">{lead.location}</span>
+                            </span>
+                          )}
+
                           <span className="px-1.5 py-0.5 rounded bg-secondary text-secondary-foreground font-semibold flex items-center gap-1">
                             {lead.deploymentType === 'On-Premise' ? <Server className="w-2.5 h-2.5" /> : <Cloud className="w-2.5 h-2.5" />}
-                            {lead.deploymentType || 'Cloud SaaS'}
+                            {lead.deploymentType || 'On-Premise'}
                           </span>
                         </div>
 

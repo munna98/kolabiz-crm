@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS public.leads (
     contact_person TEXT NOT NULL,
     email TEXT,
     phone TEXT,
+    location TEXT DEFAULT 'Mumbai, Maharashtra',
     product TEXT DEFAULT 'Kolabiz ERP',
     title TEXT,
     value NUMERIC DEFAULT 15000,
@@ -26,6 +27,9 @@ CREATE TABLE IF NOT EXISTS public.leads (
     deployment_type TEXT DEFAULT 'On-Premise',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
+
+-- Ensure location column exists if table was already created
+ALTER TABLE public.leads ADD COLUMN IF NOT EXISTS location TEXT DEFAULT 'Mumbai, Maharashtra';
 
 -- 2. Create ACTIVITIES table
 CREATE TABLE IF NOT EXISTS public.activities (
@@ -49,6 +53,9 @@ CREATE TABLE IF NOT EXISTS public.staff (
     status TEXT DEFAULT 'Active',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
+
+-- Ensure password column exists if table was already created
+ALTER TABLE public.staff ADD COLUMN IF NOT EXISTS password TEXT DEFAULT 'Kolabizerp@00916';
 
 -- 4. Enable Row Level Security (RLS)
 ALTER TABLE public.leads ENABLE ROW LEVEL SECURITY;
