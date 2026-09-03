@@ -124,25 +124,37 @@ export const fetchLeadsFromSupabase = async () => {
   if (!client) return null;
 
   try {
-    const { data: leadsData, error: leadsErr } = await client
+    let leadsData = null;
+
+    // 1. Try ordering by created_at first
+    const resWithOrder = await client
       .from('leads')
       .select('*')
       .order('created_at', { ascending: false });
 
-    if (leadsErr) throw leadsErr;
+    if (resWithOrder.error) {
+      // Fallback: fetch without created_at ordering if column doesn't exist
+      const resWithoutOrder = await client.from('leads').select('*');
+      if (resWithoutOrder.error) throw resWithoutOrder.error;
+      leadsData = resWithoutOrder.data;
+    } else {
+      leadsData = resWithOrder.data;
+    }
 
-    const { data: activitiesData, error: actErr } = await client
-      .from('activities')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (actErr) console.warn('Could not fetch activities:', actErr);
-
-    const activitiesByLead = {};
-    (activitiesData || []).forEach(act => {
-      if (!activitiesByLead[act.lead_id]) activitiesByLead[act.lead_id] = [];
-      activitiesByLead[act.lead_id].push(mapActivityFromDB(act));
-    });
+    // 2. Fetch activities safely without breaking lead fetch if activities table has issues
+    let activitiesByLead = {};
+    try {
+      const { data: activitiesData } = await client
+        .from('activities')
+        .select('*');
+      
+      (activitiesData || []).forEach(act => {
+        if (!activitiesByLead[act.lead_id]) activitiesByLead[act.lead_id] = [];
+        activitiesByLead[act.lead_id].push(mapActivityFromDB(act));
+      });
+    } catch (e) {
+      console.warn('Activities table fetch skipped or failed:', e);
+    }
 
     return (leadsData || []).map(row => {
       const mapped = mapLeadFromDB(row);
@@ -161,27 +173,60 @@ export const saveLeadToSupabase = async (lead) => {
 
   try {
     const dbLead = mapLeadToDB(lead);
-    const { data: savedLead, error: leadErr } = await client
+
+    // 1. Upsert full lead object (without .select() to mirror staff saving & avoid RLS RETURNING restriction)
+    let { error: leadErr } = await client
       .from('leads')
-      .upsert(dbLead, { onConflict: 'id' })
-      .select();
+      .upsert(dbLead, { onConflict: 'id' });
+
+    // 2. If a column mismatch error occurs (e.g. Postgres code 42703 for missing location/deployment_type column),
+    // retry with core fields to guarantee database persistence on older schema tables.
+    if (leadErr && (leadErr.code === '42703' || leadErr.message?.includes('column'))) {
+      console.warn('Retrying lead upsert with core schema fields due to column mismatch:', leadErr.message);
+      const coreLead = {
+        id: String(lead.id),
+        client_name: lead.clientName || 'Unnamed Client',
+        contact_person: lead.contactPerson || 'N/A',
+        email: sanitizeString(lead.email),
+        phone: sanitizeString(lead.phone),
+        product: lead.product || 'Kolabiz ERP',
+        title: lead.title || lead.product || 'Kolabiz ERP',
+        value: Number(lead.value) || 0,
+        stage: lead.stage || 'inbound',
+        lead_score: lead.leadScore || 'Warm',
+        source: lead.source || 'Website',
+        last_contact_date: sanitizeDate(lead.lastContactDate),
+        next_follow_up: sanitizeDate(lead.nextFollowUp),
+        assigned_to: lead.assignedTo || 'Alex Rivers',
+        notes: sanitizeString(lead.notes)
+      };
+
+      const retryRes = await client
+        .from('leads')
+        .upsert(coreLead, { onConflict: 'id' });
+      leadErr = retryRes.error;
+    }
 
     if (leadErr) throw leadErr;
 
+    // 3. Save activities safely if present
     if (lead.activities && lead.activities.length > 0) {
-      const dbActivities = lead.activities
-        .filter(a => a && a.summary)
-        .map(a => mapActivityToDB(a, lead.id));
+      try {
+        const dbActivities = lead.activities
+          .filter(a => a && a.summary)
+          .map(a => mapActivityToDB(a, lead.id));
 
-      if (dbActivities.length > 0) {
-        const { error: actErr } = await client
-          .from('activities')
-          .upsert(dbActivities, { onConflict: 'id' });
-        if (actErr) console.warn('Could not save activities to Supabase:', actErr);
+        if (dbActivities.length > 0) {
+          await client
+            .from('activities')
+            .upsert(dbActivities, { onConflict: 'id' });
+        }
+      } catch (actErr) {
+        console.warn('Could not save activities to Supabase:', actErr);
       }
     }
 
-    return { success: true, data: savedLead };
+    return { success: true };
   } catch (err) {
     console.error('Error saving lead to Supabase:', err);
     return { success: false, error: err.message || 'Failed to save lead to database' };
