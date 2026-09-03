@@ -27,6 +27,19 @@ export const getSupabaseClient = () => {
   return supabaseInstance;
 };
 
+// Data sanitization helpers to prevent Postgres DATE / syntax errors
+const sanitizeDate = (val) => {
+  if (!val || typeof val !== 'string') return null;
+  const trimmed = val.trim();
+  return trimmed !== '' ? trimmed : null;
+};
+
+const sanitizeString = (val) => {
+  if (!val || typeof val !== 'string') return null;
+  const trimmed = val.trim();
+  return trimmed !== '' ? trimmed : null;
+};
+
 // Map DB snake_case column names to camelCase JS objects
 export const mapLeadFromDB = (row) => {
   if (!row) return null;
@@ -68,37 +81,37 @@ export const mapActivityFromDB = (act) => {
 
 export const mapLeadToDB = (lead) => {
   return {
-    id: lead.id,
-    client_name: lead.clientName,
-    contact_person: lead.contactPerson,
-    email: lead.email,
-    phone: lead.phone,
+    id: String(lead.id),
+    client_name: lead.clientName || 'Unnamed Client',
+    contact_person: lead.contactPerson || 'N/A',
+    email: sanitizeString(lead.email),
+    phone: sanitizeString(lead.phone),
     location: lead.location || 'Mumbai, Maharashtra',
     product: lead.product || 'Kolabiz ERP',
-    title: lead.title,
-    value: lead.value || 0,
-    stage: lead.stage,
-    lead_score: lead.leadScore,
-    source: lead.source,
-    last_contact_date: lead.lastContactDate,
-    next_follow_up: lead.nextFollowUp,
-    assigned_to: lead.assignedTo,
-    notes: lead.notes,
-    client_health: lead.clientHealth,
-    onboarding_stage: lead.onboardingStage,
-    support_renewal_date: lead.supportRenewalDate,
+    title: lead.title || lead.product || 'Kolabiz ERP',
+    value: Number(lead.value) || 0,
+    stage: lead.stage || 'inbound',
+    lead_score: lead.leadScore || 'Warm',
+    source: lead.source || 'Website',
+    last_contact_date: sanitizeDate(lead.lastContactDate),
+    next_follow_up: sanitizeDate(lead.nextFollowUp),
+    assigned_to: lead.assignedTo || 'Alex Rivers',
+    notes: sanitizeString(lead.notes),
+    client_health: lead.clientHealth || 'Green',
+    onboarding_stage: lead.onboardingStage || 'Data Migration',
+    support_renewal_date: sanitizeDate(lead.supportRenewalDate),
     deployment_type: lead.deploymentType || 'On-Premise'
   };
 };
 
 export const mapActivityToDB = (act, leadId) => {
   return {
-    id: act.id,
-    lead_id: leadId,
-    type: act.type,
-    date: act.date,
-    summary: act.summary,
-    author: act.author
+    id: String(act.id),
+    lead_id: String(leadId),
+    type: act.type || 'Note',
+    date: sanitizeDate(act.date) || new Date().toISOString().split('T')[0],
+    summary: act.summary || '',
+    author: act.author || 'Sales Agent'
   };
 };
 
@@ -144,55 +157,88 @@ export const fetchLeadsFromSupabase = async () => {
 
 export const saveLeadToSupabase = async (lead) => {
   const client = getSupabaseClient();
-  if (!client) return false;
+  if (!client) return { success: false, error: 'Supabase client is not configured' };
 
   try {
     const dbLead = mapLeadToDB(lead);
-    const { error: leadErr } = await client
+    const { data: savedLead, error: leadErr } = await client
       .from('leads')
-      .upsert(dbLead, { onConflict: 'id' });
+      .upsert(dbLead, { onConflict: 'id' })
+      .select();
 
     if (leadErr) throw leadErr;
 
     if (lead.activities && lead.activities.length > 0) {
-      const dbActivities = lead.activities.map(a => mapActivityToDB(a, lead.id));
-      await client
-        .from('activities')
-        .upsert(dbActivities, { onConflict: 'id' });
+      const dbActivities = lead.activities
+        .filter(a => a && a.summary)
+        .map(a => mapActivityToDB(a, lead.id));
+
+      if (dbActivities.length > 0) {
+        const { error: actErr } = await client
+          .from('activities')
+          .upsert(dbActivities, { onConflict: 'id' });
+        if (actErr) console.warn('Could not save activities to Supabase:', actErr);
+      }
     }
 
-    return true;
+    return { success: true, data: savedLead };
   } catch (err) {
     console.error('Error saving lead to Supabase:', err);
-    return false;
+    return { success: false, error: err.message || 'Failed to save lead to database' };
   }
 };
 
 export const deleteLeadFromSupabase = async (id) => {
   const client = getSupabaseClient();
-  if (!client) return false;
+  if (!client) return { success: false, error: 'Supabase client is not configured' };
 
   try {
     const { error } = await client.from('leads').delete().eq('id', id);
     if (error) throw error;
-    return true;
+    return { success: true };
   } catch (err) {
     console.error('Error deleting lead from Supabase:', err);
-    return false;
+    return { success: false, error: err.message || 'Failed to delete lead from database' };
   }
 };
 
 export const clearAllLeadsInSupabase = async () => {
   const client = getSupabaseClient();
-  if (!client) return false;
+  if (!client) return { success: false, error: 'Supabase client is not configured' };
 
   try {
     const { error } = await client.from('leads').delete().neq('id', '000');
     if (error) throw error;
-    return true;
+    return { success: true };
   } catch (err) {
     console.error('Error clearing leads in Supabase:', err);
-    return false;
+    return { success: false, error: err.message || 'Failed to clear leads in database' };
+  }
+};
+
+export const testSupabaseConnection = async () => {
+  const client = getSupabaseClient();
+  if (!client) {
+    return { success: false, error: 'Supabase credentials missing. Please enter Project URL & Anon Key.' };
+  }
+
+  try {
+    const { count, error } = await client
+      .from('leads')
+      .select('*', { count: 'exact', head: true });
+
+    if (error) throw error;
+
+    return { 
+      success: true, 
+      message: `Successfully connected to Supabase! Leads table verified (${count !== null ? count : 0} existing records).` 
+    };
+  } catch (err) {
+    console.error('Supabase connection test failed:', err);
+    return { 
+      success: false, 
+      error: err.message || 'Could not query leads table in Supabase. Check database schema.' 
+    };
   }
 };
 
@@ -229,7 +275,7 @@ export const fetchStaffFromSupabase = async () => {
 
 export const saveStaffToSupabase = async (member) => {
   const client = getSupabaseClient();
-  if (!client) return false;
+  if (!client) return { success: false, error: 'Supabase client is not configured' };
 
   try {
     const { error } = await client
@@ -245,24 +291,24 @@ export const saveStaffToSupabase = async (member) => {
       }, { onConflict: 'id' });
 
     if (error) throw error;
-    return true;
+    return { success: true };
   } catch (err) {
     console.error('Error saving staff member:', err);
-    return false;
+    return { success: false, error: err.message || 'Failed to save staff member to database' };
   }
 };
 
 export const deleteStaffFromSupabase = async (id) => {
   const client = getSupabaseClient();
-  if (!client) return false;
+  if (!client) return { success: false, error: 'Supabase client is not configured' };
 
   try {
     const { error } = await client.from('staff').delete().eq('id', id);
     if (error) throw error;
-    return true;
+    return { success: true };
   } catch (err) {
     console.error('Error deleting staff from Supabase:', err);
-    return false;
+    return { success: false, error: err.message || 'Failed to delete staff member from database' };
   }
 };
 

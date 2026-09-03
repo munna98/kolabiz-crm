@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Database, X, Check, Save, Copy, Sparkles, ExternalLink } from 'lucide-react';
-import { getSupabaseConfig } from '../lib/supabase';
+import { Database, X, Check, Save, Copy, Sparkles, ExternalLink, RefreshCw, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { getSupabaseConfig, testSupabaseConnection } from '../lib/supabase';
 
 export default function SupabaseModal({ isOpen, onClose, onConfigSaved }) {
   const currentConfig = getSupabaseConfig();
@@ -8,6 +8,8 @@ export default function SupabaseModal({ isOpen, onClose, onConfigSaved }) {
   const [url, setUrl] = useState(currentConfig.url || '');
   const [key, setKey] = useState(currentConfig.key || '');
   const [copiedSql, setCopiedSql] = useState(false);
+  const [testResult, setTestResult] = useState(null);
+  const [isTesting, setIsTesting] = useState(false);
 
   if (!isOpen) return null;
 
@@ -24,8 +26,22 @@ export default function SupabaseModal({ isOpen, onClose, onConfigSaved }) {
     localStorage.removeItem('kolabiz_supabase_anon_key');
     setUrl('');
     setKey('');
+    setTestResult(null);
     onConfigSaved();
     onClose();
+  };
+
+  const handleTestConnection = async () => {
+    setIsTesting(true);
+    setTestResult(null);
+
+    // Save inputs to localStorage temporarily to test client
+    localStorage.setItem('kolabiz_supabase_url', url.trim());
+    localStorage.setItem('kolabiz_supabase_anon_key', key.trim());
+
+    const result = await testSupabaseConnection();
+    setTestResult(result);
+    setIsTesting(false);
   };
 
   const sqlSnippet = `-- Execute in Supabase SQL Editor:
@@ -150,6 +166,34 @@ ALTER PUBLICATION supabase_realtime ADD TABLE public.activities;`;
                 className="w-full px-3 py-2 bg-input border border-border rounded-md text-xs font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
               />
             </div>
+          </div>
+
+          {/* Connection Test Diagnostic Banner */}
+          {testResult && (
+            <div className={`p-3 rounded-md border text-xs flex items-start gap-2 ${
+              testResult.success 
+                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400' 
+                : 'bg-destructive/10 border-destructive/30 text-destructive'
+            }`}>
+              {testResult.success ? <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" /> : <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />}
+              <div>
+                <p className="font-bold">{testResult.success ? 'Connection Verified' : 'Database Connection Failed'}</p>
+                <p className="mt-0.5">{testResult.success ? testResult.message : testResult.error}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Action Row */}
+          <div className="flex items-center justify-between pt-2">
+            <button
+              type="button"
+              onClick={handleTestConnection}
+              disabled={isTesting || !url || !key}
+              className="flex items-center space-x-1.5 px-3 py-1.5 bg-secondary text-secondary-foreground hover:bg-secondary/80 text-xs font-semibold rounded border border-border disabled:opacity-50 cursor-pointer"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isTesting ? 'animate-spin' : ''}`} />
+              <span>{isTesting ? 'Testing DB...' : 'Test Connection'}</span>
+            </button>
           </div>
 
           {/* Footer Actions */}

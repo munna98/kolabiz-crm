@@ -169,12 +169,12 @@ export default function App() {
   const handleSaveLead = async (leadData) => {
     let updatedLeads;
     let targetLead;
+    const isNew = !leadData.id;
 
-    if (leadData.id) {
+    if (!isNew) {
       // Edit existing
       targetLead = leadData;
       updatedLeads = leads.map(l => (l.id === leadData.id ? leadData : l));
-      showToast(`Updated lead for ${leadData.clientName}`);
     } else {
       // Create new
       targetLead = {
@@ -182,7 +182,6 @@ export default function App() {
         id: 'erp-' + Date.now()
       };
       updatedLeads = [targetLead, ...leads];
-      showToast(`Created new lead for ${leadData.clientName}`);
     }
 
     setLeads(updatedLeads);
@@ -190,7 +189,20 @@ export default function App() {
     // Save to Supabase DB if configured
     const config = getSupabaseConfig();
     if (config.isConfigured) {
-      await saveLeadToSupabase(targetLead);
+      const res = await saveLeadToSupabase(targetLead);
+      if (res && res.success) {
+        showToast(isNew 
+          ? `⚡ Created & stored lead for ${targetLead.clientName} in Supabase DB!` 
+          : `⚡ Updated lead for ${targetLead.clientName} in Supabase DB!`
+        );
+      } else {
+        showToast(`⚠️ Saved locally, but DB error: ${res?.error || 'Save failed'}`);
+      }
+    } else {
+      showToast(isNew 
+        ? `💾 Created lead for ${targetLead.clientName} (Local Storage)` 
+        : `💾 Updated lead for ${targetLead.clientName} (Local Storage)`
+      );
     }
   };
 
@@ -198,11 +210,17 @@ export default function App() {
     const target = leads.find(l => l.id === id);
     const updated = leads.filter(l => l.id !== id);
     setLeads(updated);
-    showToast(`Deleted lead ${target ? target.clientName : ''}`);
 
     const config = getSupabaseConfig();
     if (config.isConfigured) {
-      await deleteLeadFromSupabase(id);
+      const res = await deleteLeadFromSupabase(id);
+      if (res && res.success) {
+        showToast(`⚡ Deleted lead ${target ? target.clientName : ''} from Supabase DB`);
+      } else {
+        showToast(`⚠️ Removed locally, but DB error: ${res?.error || 'Delete failed'}`);
+      }
+    } else {
+      showToast(`Deleted lead ${target ? target.clientName : ''}`);
     }
   };
 
@@ -217,10 +235,16 @@ export default function App() {
     
     const target = updated.find(l => l.id === id);
     if (target) {
-      showToast(`Updated stage for ${target.clientName}`);
       const config = getSupabaseConfig();
       if (config.isConfigured) {
-        await saveLeadToSupabase(target);
+        const res = await saveLeadToSupabase(target);
+        if (res && res.success) {
+          showToast(`⚡ Updated stage for ${target.clientName} in DB`);
+        } else {
+          showToast(`⚠️ Stage updated locally (DB Sync error: ${res?.error || 'Failed'})`);
+        }
+      } else {
+        showToast(`Updated stage for ${target.clientName}`);
       }
     }
   };
@@ -236,16 +260,39 @@ export default function App() {
     
     const target = updated.find(l => l.id === id);
     if (target) {
-      showToast(`Updated health status for ${target.clientName}`);
       const config = getSupabaseConfig();
       if (config.isConfigured) {
-        await saveLeadToSupabase(target);
+        const res = await saveLeadToSupabase(target);
+        if (res && res.success) {
+          showToast(`⚡ Updated health for ${target.clientName} in DB`);
+        } else {
+          showToast(`⚠️ Health updated locally (DB Sync error)`);
+        }
+      } else {
+        showToast(`Updated health status for ${target.clientName}`);
       }
     }
   };
 
   const handleOpenAddModalWithQuote = (quoteData) => {
-    setSelectedLead(null);
+    setSelectedLead({
+      clientName: '',
+      contactPerson: '',
+      email: '',
+      phone: '',
+      location: 'Mumbai, Maharashtra',
+      product: quoteData.product || 'Kolabiz ERP',
+      title: quoteData.title || 'Custom ERP Solution',
+      value: quoteData.value || 15000,
+      deploymentType: quoteData.deploymentType || 'On-Premise',
+      stage: 'inbound',
+      leadScore: 'Warm',
+      source: 'Website Quote',
+      lastContactDate: new Date().toISOString().split('T')[0],
+      nextFollowUp: new Date(Date.now() + 86400000 * 2).toISOString().split('T')[0],
+      notes: quoteData.notes || '',
+      activities: []
+    });
     setIsModalOpen(true);
     setActiveTab('pipeline');
   };
